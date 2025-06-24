@@ -62,17 +62,23 @@
 </div>
 
 <div class="mb-3">
-  <label for="date" class="date-label">Select Date and Time</label>
-  <input type="datetime-local" class="form-control" id="dtInput">
+  <label for="date" class="date-label">Select Date and Time (From)</label>
+  <input type="datetime-local" class="form-control" id="dtFromInput">
+</div>
+<div class="mb-3">
+  <label for="date" class="date-label">Select Date and Time (To)</label>
+  <input type="datetime-local" class="form-control" id="dtToInput">
 </div>
 <button type="button" class="btn btn-primary" onclick="convertDate()">Submit</button>
 
 <p id="result"></p>
+<p id="resultTo"></p>
 <div class="table-space"></div>
+<h3 id="val-sum"></h3>
 
 <script>
   function convertDate() {
-    const input = document.getElementById('dtInput').value;
+    const input = document.getElementById('dtFromInput').value;
 
     if (!input) {
         document.getElementById('result').innerText = 'Please enter a datetime.';
@@ -89,21 +95,42 @@
     const hour = date.getHours().toString().padStart(2, '0'); // 00–23
 
     const result = `${year}${dayOfYear}${hour}`;
+
+    const inputTo= document.getElementById('dtToInput').value;
+
+    if (!inputTo) {
+        document.getElementById('resultTo').innerText = 'Please enter a datetime.';
+        return;
+    }
+
+    const dateTo = new Date(inputTo);
+
+    const yearTo = dateTo.getFullYear().toString().slice(-2); 
+    const startTo = new Date(dateTo.getFullYear(), 0, 0);
+    const diffTo = dateTo - startTo;
+    const oneDayTo = 1000 * 60 * 60 * 24;
+    const dayOfYearTo = Math.floor(diffTo / oneDayTo).toString().padStart(3, '0'); // 001–366
+    const hourTo = dateTo.getHours().toString().padStart(2, '0'); // 00–23
+
+    const resultTo = `${yearTo}${dayOfYearTo}${hourTo}`;
  
-    document.getElementById('result').innerText = `Formatted: ${result}`;
+    document.getElementById('result').innerText = `Formatted From Date: ${result}`;
+    document.getElementById('resultTo').innerText = `Formatted To Date: ${resultTo}`;
     let usernameV=document.getElementById('username-input').value
     let passwordV=document.getElementById('password-input').value
     let serverV=document.getElementById('server-input').value
     let databaseV=document.getElementById('database-input').value
     let XMLV=document.getElementById('XML-input').value
-    
+
     var entry={
-      date:result,
+      fromDate:result,
+      toDate:resultTo,
       username:usernameV,
       password:passwordV,
       server:serverV,
       database:databaseV,
-      XML:XMLV
+      XML:XMLV,
+      date_time:date
     };
     fetch(`${window.origin}/inc`,{
       method:'POST',
@@ -124,7 +151,7 @@
   .then(function (data) {
     console.log(data.table);
     document.querySelector('.table-space').innerHTML = data.table;
-
+    document.querySelector('#val-sum').innerText = `Total Value Summary: ${data.valSum}`;
     $('#myTable').DataTable({
       dom: 'Bfrtip',
       buttons: ['copy', 'csv', 'excel', 'pdf','print']
