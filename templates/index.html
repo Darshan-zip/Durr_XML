@@ -33,7 +33,35 @@
 
 <!-- Print button -->
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+<style>
+    #loader {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      width: 100vw;
+      background: rgba(255, 255, 255, 0.8);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+    }
 
+    .spinner {
+      border: 8px solid #f3f3f3;
+      border-top: 8px solid #007bff;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
 
 </head>
 
@@ -73,12 +101,18 @@
 
 <p id="result"></p>
 <p id="resultTo"></p>
+<div id="loader">
+  <div class="spinner"></div>
+</div>
 <div class="table-space"></div>
 <h3 id="val-sum"></h3>
 
 <script>
   function convertDate() {
+    document.getElementById("loader").style.display = "flex";
+    
     const input = document.getElementById('dtFromInput').value;
+
 
     if (!input) {
         document.getElementById('result').innerText = 'Please enter a datetime.';
@@ -132,6 +166,7 @@
       XML:XMLV,
       date_time:date
     };
+    
     fetch(`${window.origin}/inc`,{
       method:'POST',
       credentials:"include",
@@ -146,6 +181,7 @@
       console.log('Response was not 200');
       return;
     }
+    document.getElementById("loader").style.display = "none";
     return response.json();
   })
   .then(function (data) {
