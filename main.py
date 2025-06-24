@@ -87,10 +87,12 @@ def inc():
 
     
     df_sql_date['date & time'] = df_sql_date['value_key'].apply(decode_yydddHH).dt.strftime('%Y-%m-%d %H:%M')
-
+    df_sql_date = df_sql_date.iloc[:, 1:]
     result_df = df_sql_date.merge(df, how='left', on='id')
     val_sum=result_df['value_summary'].sum()
     val_sum=round(val_sum, 2)
+    
+
     html_table = result_df.to_html(index=False, classes="display", table_id="myTable")
    
     res=make_response(jsonify({"table":html_table,"valSum":val_sum}),200)
